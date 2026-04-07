@@ -111,6 +111,65 @@ openclaw/
    ```
 5. **Parlez au bot** pour le configurer !
 
+## 🚀 Post-Déploiement - Configuration des Bots
+
+Après le premier déploiement sur Coolify, ouvrez le **terminal intégré** (Coolify UI) et exécutez ces commandes :
+
+### 1. Ajouter les Bots Telegram
+
+```bash
+# Bot General (Majordome/Assistant)
+docker compose exec openclaw-gateway node dist/index.js channels add \
+  --channel telegram --account general --token $TELEGRAM_BOT_TOKEN_GENERAL
+
+# Bot Tech (Expert Technique)
+docker compose exec openclaw-gateway node dist/index.js channels add \
+  --channel telegram --account tech --token $TELEGRAM_BOT_TOKEN_TECH
+
+# Bot Commercial (Stratège Business)
+docker compose exec openclaw-gateway node dist/index.js channels add \
+  --channel telegram --account commercial --token $TELEGRAM_BOT_TOKEN_COMMERCIAL
+```
+
+### 2. Configurer l'Admin (Allowlist)
+
+```bash
+# Définir votre ID Telegram comme admin pour tous les bots
+docker compose exec openclaw-gateway node dist/index.js config set \
+  --path channels.telegram.accounts.general.allowFrom \
+  --value '["'$TELEGRAM_ADMIN_USER_ID'"]'
+
+docker compose exec openclaw-gateway node dist/index.js config set \
+  --path channels.telegram.accounts.tech.allowFrom \
+  --value '["'$TELEGRAM_ADMIN_USER_ID'"]'
+
+docker compose exec openclaw-gateway node dist/index.js config set \
+  --path channels.telegram.accounts.commercial.allowFrom \
+  --value '["'$TELEGRAM_ADMIN_USER_ID'"]'
+```
+
+### 3. Redémarrer pour Appliquer
+
+```bash
+docker compose restart
+```
+
+### 4. Vérifier la Configuration
+
+```bash
+# Lister les channels configurés
+docker compose exec openclaw-gateway node dist/index.js channels list
+```
+
+### 5. Tester les Bots
+
+Envoyez **"Bonjour"** à chaque bot sur Telegram :
+- **@votre_bot_general** → Devrait répondre et lancer le bootstrap (configuration)
+- **@votre_bot_tech** → L'agent vous demandera qui il est
+- **@votre_bot_commercial** → Répondez pour définir sa personnalité
+
+---
+
 ## 🧠 Comment ça Marche
 
 1. **Démarrage** : OpenClaw lit `config/openclaw.json` avec MiniMax préconfiguré
