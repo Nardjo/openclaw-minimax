@@ -110,30 +110,39 @@ openclaw/
    ```
 5. **Parlez au bot** pour le configurer !
 
-## 🚀 Post-Déploiement - Configuration des Bots
+## 🚀 Post-Déploiement - Configuration Manuelle
 
-Après le premier déploiement sur Coolify, ouvrez le **terminal intégré** (Coolify UI) et exécutez ces commandes :
+> **⚠️ ÉTAPE CRUCIALE** : Après le déploiement initial, vous devez configurer les bots manuellement.
 
-### 1. Ajouter les Bots Telegram
+### Accéder au Terminal Coolify
+
+1. Dans votre projet Coolify → onglet **"Terminal"**
+2. Ou cliquez sur le container → **"Execute Command"**
+
+### Commandes à Exécuter
+
+**Étape 1 : Ajouter les Bots Telegram**
+
+Copiez-collez ces commandes une par une :
 
 ```bash
-# Bot General (Majordome/Assistant)
+# Bot General
 docker compose exec openclaw-gateway node dist/index.js channels add \
   --channel telegram --account general --token $TELEGRAM_BOT_TOKEN_GENERAL
 
-# Bot Tech (Expert Technique)
+# Bot Tech  
 docker compose exec openclaw-gateway node dist/index.js channels add \
   --channel telegram --account tech --token $TELEGRAM_BOT_TOKEN_TECH
 
-# Bot Commercial (Stratège Business)
+# Bot Commercial
 docker compose exec openclaw-gateway node dist/index.js channels add \
   --channel telegram --account commercial --token $TELEGRAM_BOT_TOKEN_COMMERCIAL
 ```
 
-### 2. Configurer l'Admin (Allowlist)
+**Étape 2 : Configurer l'Admin (Allowlist)**
 
 ```bash
-# Définir votre ID Telegram comme admin pour tous les bots
+# Autoriser votre ID Telegram sur tous les bots
 docker compose exec openclaw-gateway node dist/index.js config set \
   --path channels.telegram.accounts.general.allowFrom \
   --value '["'$TELEGRAM_ADMIN_USER_ID'"]'
@@ -147,25 +156,23 @@ docker compose exec openclaw-gateway node dist/index.js config set \
   --value '["'$TELEGRAM_ADMIN_USER_ID'"]'
 ```
 
-### 3. Redémarrer pour Appliquer
+**Étape 3 : Redémarrer**
 
 ```bash
 docker compose restart
 ```
 
-### 4. Vérifier la Configuration
+**Étape 4 : Vérifier**
 
 ```bash
-# Lister les channels configurés
 docker compose exec openclaw-gateway node dist/index.js channels list
 ```
 
-### 5. Tester les Bots
+Vous devriez voir vos 3 bots listés.
 
-Envoyez **"Bonjour"** à chaque bot sur Telegram :
-- **@votre_bot_general** → Devrait répondre et lancer le bootstrap (configuration)
-- **@votre_bot_tech** → L'agent vous demandera qui il est
-- **@votre_bot_commercial** → Répondez pour définir sa personnalité
+**Étape 5 : Tester**
+
+Envoyez **"Bonjour"** à vos bots sur Telegram !
 
 ---
 
