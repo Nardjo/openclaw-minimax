@@ -84,7 +84,6 @@ openclaw/
 ├── .env.example            # Template des variables
 ├── config/
 │   └── openclaw.json       # Config par défaut (MiniMax)
-├── init.sh                 # Script d'initialisation (optionnel)
 └── README.md               # Ce fichier
 ```
 
