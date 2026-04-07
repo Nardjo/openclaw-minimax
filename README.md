@@ -1,152 +1,166 @@
-# OpenClaw — Multi-Agent Telegram Gateway
+# OpenClaw Multi-Agent - MiniMax Edition
 
-Agents IA personnels via Telegram, tous dans un seul Gateway avec multi-agent routing. Chaque bot a son propre workspace et sa propre memoire. Propulse par [OpenClaw](https://openclaw.ai/).
+Agents IA personnels via Telegram, propulsés par **MiniMax-M2.7**. Un seul Gateway, plusieurs bots, chacun avec sa propre personnalité et mémoire.
 
-## Architecture
+## 🎯 Objectif
 
-```
-Telegram
-  ├── @Raccoon33Bot       → agent "general"
-  ├── @Raccoon33DevBot    → agent "tech"
-  └── @Raccoon33SocialBot → agent "social"
-         │
-         ▼
-   Single Gateway (port 18789)
-   Multi-agent routing via bindings
-```
+Déployer facilement sur **Coolify** (ou Docker) avec :
+- **Modèle AI** : MiniMax-M2.7 (via Coding Plan)
+- **Multi-agents** : Autant de bots Telegram que nécessaire
+- **Configuration zéro** : Les agents se configurent en conversation
 
-Un seul process Gateway route les messages vers le bon agent selon le bot Telegram utilise.
-Chaque agent a son propre `SOUL.md`, `AGENTS.md` et `MEMORY.md` — isole par defaut.
+## 🚀 Déploiement Rapide sur Coolify
 
-## Prerequisites
-
-- Docker + Docker Compose
-- Tailscale account + auth key
-- 3 bot tokens Telegram (via [@BotFather](https://t.me/BotFather))
-- Anthropic API key
-
-## Setup
-
-### 1. Clone et configuration
+### 1. Préparer les Secrets
 
 ```bash
-git clone git@github.com:Nardjo/openclaw.git
+# Clonez ce repo
+git clone <votre-repo>
 cd openclaw
+
+# Copiez et éditez le .env
 cp .env.example .env
 ```
 
-### 2. Creer les bots Telegram
-
-Via [@BotFather](https://t.me/BotFather), creer 3 bots :
-1. Un bot "General" → `TELEGRAM_BOT_TOKEN_GENERAL`
-2. Un bot "Tech" → `TELEGRAM_BOT_TOKEN_TECH`
-3. Un bot "Social" → `TELEGRAM_BOT_TOKEN_SOCIAL`
-
-### 3. Configurer `.env`
-
-```bash
-# Generer le gateway token
-openssl rand -hex 32  # → OPENCLAW_GATEWAY_TOKEN
+Remplissez le `.env` :
+```env
+OPENCLAW_GATEWAY_TOKEN=$(openssl rand -hex 32)
+MINIMAX_API_KEY=sk-cp-...  # Depuis https://platform.minimax.io/
+TELEGRAM_BOT_TOKEN_GENERAL=123456:ABC...
+TELEGRAM_BOT_TOKEN_TECH=123456:DEF...
+TELEGRAM_BOT_TOKEN_COMMERCIAL=123456:GHI...
+TELEGRAM_ADMIN_USER_ID=12345678  # Votre ID Telegram
 ```
 
-Remplir toutes les variables dans `.env`.
-
-### 4. Lancer
+### 2. Push sur GitHub
 
 ```bash
-docker compose up -d
+git add .
+git commit -m "MiniMax multi-agent ready"
+git push origin main
 ```
 
-### 5. Utiliser
+### 3. Déployer sur Coolify
 
-Envoyer un message a chaque bot dans Telegram. Chaque conversation est isolee avec sa propre memoire.
+1. **Coolify Dashboard** → Create New Resource
+2. **Source** : GitHub → Sélectionnez ce repo
+3. **Type** : Docker Compose (détecté automatiquement)
+4. **Environment Variables** : Coolify importera votre `.env` ou vous pouvez les ajouter manuellement
+5. **Deploy**
 
-## Agents
+### 4. Configurer les Bots (Une fois déployé)
 
-| Agent | Bot Telegram | Workspace | Description |
-|-------|-------------|-----------|-------------|
-| general | @Raccoon33Bot | `workspace/general/` | Assistant polyvalent |
-| tech | @Raccoon33DevBot | `workspace/tech/` | Dev / code / architecture |
-| social | @Raccoon33SocialBot | `workspace/social/` | Social media / contenu |
+Connectez-vous au container et ajoutez les bots Telegram :
 
-## Ajouter un agent
+```bash
+# Via Coolify Terminal ou SSH
+docker compose exec openclaw-gateway node dist/index.js channels add \
+  --channel telegram \
+  --account general \
+  --token $TELEGRAM_BOT_TOKEN_GENERAL
 
-1. Creer un bot via @BotFather
-2. Ajouter `TELEGRAM_BOT_TOKEN_<NAME>` dans `.env`
-3. Creer `workspace/<name>/SOUL.md`
-4. Ajouter l'agent dans `config/openclaw.json` : agents.list, bindings, et channels.telegram.accounts
+# Répétez pour chaque bot...
+```
 
-## Structure
+Ou utilisez la commande interactive :
+```bash
+docker compose exec openclaw-gateway sh
+node dist/index.js channels add --channel telegram --account <nom> --token <token>
+```
+
+### 5. Tester
+
+Envoyez **"Bonjour"** à vos bots Telegram !
+- L'agent va vous demander qui il est
+- Décrivez sa personnalité
+- Il écrit automatiquement son `SOUL.md`
+- Commencez à discuter avec MiniMax-M2.7 !
+
+## 📁 Structure du Projet
 
 ```
 openclaw/
-├── docker-compose.yaml
-├── serve.json
-├── .env.example
+├── docker-compose.yaml      # Configuration Docker
+├── .env.example            # Template des variables
 ├── config/
-│   └── openclaw.json          # Config unifiee multi-agent
-└── workspace/
-    ├── general/SOUL.md
-    ├── tech/SOUL.md
-    └── social/SOUL.md
+│   └── openclaw.json       # Config par défaut (MiniMax)
+├── init.sh                 # Script d'initialisation (optionnel)
+└── README.md               # Ce fichier
 ```
 
-## 🚀 Déploiement Coolify (Nouveau)
+## 🔧 Configuration
 
-Pour un déploiement simple sur Coolify avec **un seul fichier**:
+### Variables d'Environnement Requises
 
-### Fichiers nécessaires
+| Variable | Source | Description |
+|----------|--------|-------------|
+| `OPENCLAW_GATEWAY_TOKEN` | `openssl rand -hex 32` | Token de sécurité interne |
+| `MINIMAX_API_KEY` | [platform.minimax.io](https://platform.minimax.io/) | Clé API MiniMax Token Plan |
+| `TELEGRAM_BOT_TOKEN_*` | @BotFather | Tokens des bots Telegram |
+| `TELEGRAM_ADMIN_USER_ID` | @userinfobot | Votre ID Telegram (optionnel) |
 
-```
-.
-├── docker-compose.yaml    # Service unique avec volumes
-└── .env                   # Vos tokens (à créer depuis .env.example)
-```
+### Ajouter un Nouvel Agent
 
-### Déploiement
-
-1. **Créez le `.env`** depuis le template:
+1. **Créez un bot** via @BotFather sur Telegram
+2. **Ajoutez la variable** dans Coolify : `TELEGRAM_BOT_TOKEN_NEWAGENT=token`
+3. **Redéployez** le service
+4. **Ajoutez le channel** via CLI :
    ```bash
-   cp .env.example .env
-   # Éditez avec vos tokens
+   docker compose exec openclaw-gateway node dist/index.js channels add \
+     --channel telegram --account newagent --token <token>
    ```
+5. **Parlez au bot** pour le configurer !
 
-2. **Poussez sur GitHub**:
-   ```bash
-   git add docker-compose.yaml .env.example README.md
-   git commit -m "Coolify ready"
-   git push origin main
-   ```
+## 🧠 Comment ça Marche
 
-3. **Dans Coolify**:
-   - New Service → GitHub Repository
-   - Sélectionnez ce repo
-   - Coolify détecte automatiquement le docker-compose.yaml
-   - Remplissez les variables d'environnement dans l'UI
-   - Déployez
+1. **Démarrage** : OpenClaw lit `config/openclaw.json` avec MiniMax préconfiguré
+2. **Connexion** : Les bots Telegram se connectent via les tokens
+3. **Conversation** : Chaque agent maintient son propre contexte
+4. **Mémoire** : Sauvegardée dans le volume `workspaces`
+5. **Persistance** : Les volumes Docker sont persistants entre redémarrages
 
-### Configuration Coolify
+## 🛠️ Commandes Utiles
 
-Variables requises dans l'interface Coolify:
-
-| Variable | Description | Exemple |
-|----------|-------------|---------|
-| `OPENCLAW_GATEWAY_TOKEN` | Token sécurisé | `openssl rand -hex 32` |
-| `OPENROUTER_API_KEY` | Clé API OpenRouter | `sk-or-v1-...` |
-| `TELEGRAM_BOT_TOKEN_*` | Tokens des bots | `123456:ABC...` |
-
-### Ajouter un agent
-
-1. Créez un bot via @BotFather
-2. Ajoutez dans Coolify: `TELEGRAM_BOT_TOKEN_NOUVEAUNOM=token`
-3. Redéployez
-
-L'agent démarre vide et se configure via conversation avec vous!
-
-### Persistance Coolify
-
-Les volumes nommés (`config`, `workspaces`) sont persistants.
-Pour sauvegarder:
 ```bash
-docker exec <container> tar czf - /home/node/.openclaw > backup.tar.gz
+# Voir les logs
+docker compose logs -f
+
+# Liste des channels configurés
+docker compose exec openclaw-gateway node dist/index.js channels list
+
+# Redémarrer
+docker compose restart
+
+# Backup
+docker compose exec openclaw-gateway tar czf - /home/node/.openclaw > backup.tar.gz
 ```
+
+## 🔒 Sécurité
+
+- **Ne commitez jamais** votre `.env` avec les vraies clés
+- **`.env.example`** est safe à commit (valeurs placeholder)
+- **MINIMAX_API_KEY** reste dans les variables d'environnement Coolify
+- **Volumes** : Les données sont persistées mais non versionnées
+
+## 📚 Documentation
+
+- [OpenClaw Docs](https://docs.openclaw.ai)
+- [MiniMax Platform](https://platform.minimax.io/)
+- [Coolify Docs](https://coolify.io/docs)
+
+## 🐛 Dépannage
+
+**Les bots ne répondent pas :**
+1. Vérifiez les logs : `docker compose logs`
+2. Vérifiez les tokens Telegram dans Coolify
+3. Assurez-vous que les channels sont ajoutés : `docker compose exec openclaw-gateway node dist/index.js channels list`
+
+**Erreur "No API key found" :**
+- La clé MiniMax doit être configurée. Vérifiez que `MINIMAX_API_KEY` est bien dans les env vars.
+
+**Conflit Telegram (409) :**
+- Un autre process utilise les bots. Redémarrez le container : `docker compose restart`
+
+---
+
+**✨ Vos agents MiniMax sont prêts !**

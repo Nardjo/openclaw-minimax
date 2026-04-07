@@ -7,15 +7,18 @@ services:
     environment:
       - HOME=/home/node
       - NODE_ENV=production
-      - OPENCLAW_GATEWAY_BIND=lan
+      - OPENCLAW_GATEWAY_BIND=loopback
       - OPENCLAW_GATEWAY_PORT=18789
       - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
       - XDG_CONFIG_HOME=/home/node/.openclaw
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      # AI Provider: MiniMax Coding Plan
+      - MINIMAX_API_KEY=${MINIMAX_API_KEY}
       # Telegram bots - ajoutez autant que nécessaire
       - TELEGRAM_BOT_TOKEN_GENERAL=${TELEGRAM_BOT_TOKEN_GENERAL}
       - TELEGRAM_BOT_TOKEN_TECH=${TELEGRAM_BOT_TOKEN_TECH}
       - TELEGRAM_BOT_TOKEN_COMMERCIAL=${TELEGRAM_BOT_TOKEN_COMMERCIAL}
+      # Admin Telegram ID pour allowlist
+      - TELEGRAM_ADMIN_USER_ID=${TELEGRAM_ADMIN_USER_ID}
     volumes:
       - config:/home/node/.openclaw/config
       - workspaces:/home/node/.openclaw/workspaces
@@ -24,7 +27,7 @@ services:
       - dist/index.js
       - gateway
       - --bind
-      - lan
+      - loopback
       - --port
       - "18789"
       - --allow-unconfigured

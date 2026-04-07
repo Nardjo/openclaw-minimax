@@ -1,0 +1,38 @@
+{
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "accounts": {},
+      "dmPolicy": "allowlist",
+      "allowFrom": []
+    }
+  },
+  "models": {
+    "mode": "replace",
+    "providers": {
+      "minimax": {
+        "baseUrl": "https://api.minimax.io/v1",
+        "apiKey": "${MINIMAX_API_KEY}",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "MiniMax-M2.7",
+            "name": "MiniMax-M2.7",
+            "input": ["text"],
+            "cost": {
+              "input": 0.2,
+              "output": 1.0
+            }
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "minimax/MiniMax-M2.7"
+      }
+    }
+  }
+}
