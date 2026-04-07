@@ -29,8 +29,19 @@ services:
       - -c
       - |
         chown -R node:node /home/node/.openclaw 2>/dev/null || true
+        mkdir -p /home/node/.openclaw/config
         mkdir -p /home/node/.openclaw/qqbot/data
         chown -R node:node /home/node/.openclaw/qqbot
+        # Symlink la config vers le volume persistant
+        if [ -f /home/node/.openclaw/config/openclaw.json ] && [ ! -L /home/node/.openclaw/openclaw.json ]; then
+          # Restaurer depuis le volume persistant
+          ln -sf /home/node/.openclaw/config/openclaw.json /home/node/.openclaw/openclaw.json
+        elif [ ! -L /home/node/.openclaw/openclaw.json ]; then
+          # Créer le symlink pour futures persistance
+          touch /home/node/.openclaw/config/openclaw.json
+          ln -sf /home/node/.openclaw/config/openclaw.json /home/node/.openclaw/openclaw.json
+        fi
+        chown -R node:node /home/node/.openclaw/config
         exec su node -c "node dist/index.js gateway --bind loopback --port 18789 --allow-unconfigured"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:18789/healthz"]
