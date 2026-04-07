@@ -2,6 +2,7 @@ services:
   openclaw-gateway:
     image: ghcr.io/openclaw/openclaw:latest
     restart: unless-stopped
+    user: root
     ports:
       - "18789:18789"
     environment:
@@ -22,15 +23,15 @@ services:
     volumes:
       - config:/home/node/.openclaw/config
       - workspaces:/home/node/.openclaw/workspaces
-    command:
-      - node
-      - dist/index.js
-      - gateway
-      - --bind
-      - loopback
-      - --port
-      - "18789"
-      - --allow-unconfigured
+      - qqbot:/home/node/.openclaw/qqbot
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        chown -R node:node /home/node/.openclaw 2>/dev/null || true
+        mkdir -p /home/node/.openclaw/qqbot/data
+        chown -R node:node /home/node/.openclaw/qqbot
+        exec su node -c "node dist/index.js gateway --bind loopback --port 18789 --allow-unconfigured"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:18789/healthz"]
       interval: 30s
@@ -40,3 +41,4 @@ services:
 volumes:
   config:
   workspaces:
+  qqbot:
