@@ -1,0 +1,39 @@
+services:
+  openclaw-gateway:
+    image: ghcr.io/openclaw/openclaw:latest
+    restart: unless-stopped
+    ports:
+      - "18789:18789"
+    environment:
+      - HOME=/home/node
+      - NODE_ENV=production
+      - OPENCLAW_GATEWAY_BIND=lan
+      - OPENCLAW_GATEWAY_PORT=18789
+      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
+      - XDG_CONFIG_HOME=/home/node/.openclaw
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      # Telegram bots - ajoutez autant que nécessaire
+      - TELEGRAM_BOT_TOKEN_GENERAL=${TELEGRAM_BOT_TOKEN_GENERAL}
+      - TELEGRAM_BOT_TOKEN_TECH=${TELEGRAM_BOT_TOKEN_TECH}
+      - TELEGRAM_BOT_TOKEN_COMMERCIAL=${TELEGRAM_BOT_TOKEN_COMMERCIAL}
+    volumes:
+      - config:/home/node/.openclaw/config
+      - workspaces:/home/node/.openclaw/workspaces
+    command:
+      - node
+      - dist/index.js
+      - gateway
+      - --bind
+      - lan
+      - --port
+      - "18789"
+      - --allow-unconfigured
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:18789/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  config:
+  workspaces:
